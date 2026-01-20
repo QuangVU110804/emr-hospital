@@ -1,3 +1,4 @@
+// src/models/doctor.ts
 import { Role } from "./role";
 export interface Doctor {
     id: string;

@@ -1,4 +1,4 @@
-// src/models/Patient.ts
+// src/models/patient.ts
 export interface Patient {
   id: string;
   name: string;
