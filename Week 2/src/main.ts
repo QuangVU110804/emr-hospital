@@ -1,6 +1,6 @@
 // main.ts
 import { Patient } from './models/Patient';
-import { getPatientInfo } from './services/patientService';
+import { getPatientInfo } from './services/patientInfo';
 import { addItem } from './utils/addItem';
 import { checkAge } from './validators/patient.validator';
 import { PatientService } from './services/patientService';
@@ -9,6 +9,7 @@ import { isMedicalRecord } from './validators/medical-record.guard';
 import { MedicalRecord } from './models/MedicalRecord ';
 import{ isPatient } from './validators/patient.guard';
 import getLegacyPatient = require('./legacy/legacy-patient');
+import { PatientRepository } from './repositories/PatientRepository'
 
 let patients: Patient[] = [];
 /*---TEST getPatientInfo function---*/
@@ -34,6 +35,7 @@ patients.forEach(patient => {
   console.log(`Tuoi cua ${patient.name} hop le:`, checkAge(patient));
 });
 //-- test add and update patient in PatientService
+/*
 const patientService = new PatientService();
 patientService.add(p1);
 patientService.add(p2);
@@ -70,4 +72,17 @@ if (isPatient(legacyPatient)) {
   console.error('Invalid legacy patient')
 }
 console.log('Final patient list:')
+console.log(patientService.getAll())*/
+const patientRepo = new PatientRepository()
+const patientService = new PatientService(patientRepo)
+const p3: Patient = {
+  id: 'P003',
+  name: 'Nguyen Van V',
+  age: 30,
+  gender: 'male'
+}
+
+patientService.add(p3)
+patientService.update('P003', { age: 31 })
+
 console.log(patientService.getAll())

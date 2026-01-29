@@ -1,8 +1,9 @@
-// src/models/doctor.ts
-import { Role } from "./role";
-export interface Doctor {
-    id: string;
-    name: string;
-    specialization: string;
-    role: Role.Doctor;
+// src/models/Doctor.ts
+import { IIdentifiable } from './IIdentifiable'
+import { Role } from './role'
+
+export interface Doctor extends IIdentifiable {
+  name: string
+  specialization: string
+  role: Role.Doctor
 }

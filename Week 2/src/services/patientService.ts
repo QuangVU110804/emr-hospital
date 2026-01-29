@@ -1,32 +1,28 @@
-// src/services/patientService.ts
-import { Patient } from '../models/Patient';
-import { UpdatePatientDTO } from '../types/patient-update.type';
-import { Log } from '../decorators/log.decorator';
-export function getPatientInfo(patient: Patient): string {
-  return `${patient.name} (${patient.age}) - ${patient.gender}`;
-}
+// src/services/PatientService.ts
+import { Patient } from '../models/Patient'
+import { IRepository } from '../repositories/IRepository'
+import { UpdatePatientDTO } from '../types/patient-update.type'
+import { Log } from '../decorators/log.decorator'
+
 export class PatientService {
-  private patients: Patient[] = []
+  constructor(
+    private readonly patientRepository: IRepository<Patient>
+  ) {}
 
   @Log
   add(patient: Patient): void {
-    this.patients.push(patient)
+    this.patientRepository.add(patient)
   }
 
   update(id: string, data: UpdatePatientDTO): void {
-    const patient = this.patients.find(p => p.id === id)
-    if (!patient) {
-      throw new Error(`Patient with id ${id} not found`)
-    }
-
-    Object.assign(patient, data)
+    this.patientRepository.update(id, data)
   }
 
   getById(id: string): Patient | undefined {
-    return this.patients.find(p => p.id === id)
+    return this.patientRepository.findById(id)
   }
 
   getAll(): Patient[] {
-    return this.patients
+    return this.patientRepository.findAll()
   }
 }
