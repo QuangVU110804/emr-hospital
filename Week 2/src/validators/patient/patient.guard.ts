@@ -1,5 +1,5 @@
 // type groups/patient\
-import { Patient } from '../models/Patient';
+import { Patient } from '../../models/Patient';
 export function isPatient(obj: any): obj is Patient { 
  return( typeof obj.name === 'string' &&
     typeof obj.age === 'number' &&

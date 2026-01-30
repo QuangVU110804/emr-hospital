@@ -2,87 +2,107 @@
 import { Patient } from './models/Patient';
 import { getPatientInfo } from './services/patientInfo';
 import { addItem } from './utils/addItem';
-import { checkAge } from './validators/patient.validator';
+import { checkAge } from './validators/patient/patient.validator';
 import { PatientService } from './services/patientService';
 import { Status } from './models/status';
-import { isMedicalRecord } from './validators/medical-record.guard';
-import { MedicalRecord } from './models/MedicalRecord ';
-import{ isPatient } from './validators/patient.guard';
+import { isMedicalRecord } from './validators/medical-record/medical-record.guard';
+import { MedicalRecord } from './models/medical-record';
+import { isPatient } from './validators/patient/patient.guard';
+import { validatePrescription } from './validators/prescription/prescription.guard';
 import getLegacyPatient = require('./legacy/legacy-patient');
 import { PatientRepository } from './repositories/PatientRepository'
+import { PatientService as PatientServiceWithRepo } from './services/patientService'
+import { PrescriptionService } from './services/prescriptionService'
 
-let patients: Patient[] = [];
-/*---TEST getPatientInfo function---*/
+// ================= DAY 1: BASIC TYPES =================
+let patients: Patient[] = []
+
 const p1: Patient = {
   id: 'P001',
   name: 'Nguyen Van A',
   age: 30,
   gender: 'male'
-};
-console.log(getPatientInfo(p1));
-patients = addItem(patients, p1);
+}
 
 const p2: Patient = {
   id: 'P002',
   name: 'Tran Thi B',
   age: 25,
   gender: 'female'
-};
-console.log(getPatientInfo(p2));
-patients = addItem(patients, p2);
-/*---TEST checkAge function---*/
-patients.forEach(patient => {
-  console.log(`Tuoi cua ${patient.name} hop le:`, checkAge(patient));
-});
-//-- test add and update patient in PatientService
-/*
-const patientService = new PatientService();
-patientService.add(p1);
-patientService.add(p2);
-patientService.update('P001', { age: 31 });
-patientService.update('P002', { name: 'Tran Thi C', age: 26 });
-console.log(patientService.getAll());
-// ===== NGÀY 4: TYPE GUARD (VALIDATE INPUT NGOÀI HỆ THỐNG) =====
+}
 
-// giả lập dữ liệu từ API / JS legacy / user input
+console.log(getPatientInfo(p1))
+console.log(getPatientInfo(p2))
+
+patients = addItem(patients, p1)
+patients = addItem(patients, p2)
+
+// ================= DAY 2: VALIDATOR =================
+patients.forEach(p => {
+  console.log(`Tuoi ${p.name} hop le:`, checkAge(p))
+})
+
+// ================= DAY 4: TYPE GUARD =================
 const externalInput: any = {
   id: 'P003',
-  name: 'Le Van D',
+  name: 'Le Van C',
   age: 40,
   gender: 'male',
   status: Status.Active
 }
 
-// dùng type guard trước khi add vào service
+const patientRepo = new PatientRepository()
+const patientService = new PatientService(patientRepo)
+
 if (isPatient(externalInput)) {
   patientService.add(externalInput)
-  console.log('Add external patient success')
+  console.log('✓ External patient added')
 } else {
-  console.error('Invalid patient input')
+  console.error('✗ Invalid external patient')
 }
 
-console.log('Danh sach benh nhan SAU khi validate:')
-console.log(patientService.getAll())
+// Legacy JS data
 const legacyPatient = getLegacyPatient()
 
 if (isPatient(legacyPatient)) {
   patientService.add(legacyPatient)
-  console.log('Legacy patient added safely')
+  console.log('✓ Legacy patient added safely')
 } else {
-  console.error('Invalid legacy patient')
-}
-console.log('Final patient list:')
-console.log(patientService.getAll())*/
-const patientRepo = new PatientRepository()
-const patientService = new PatientService(patientRepo)
-const p3: Patient = {
-  id: 'P003',
-  name: 'Nguyen Van V',
-  age: 30,
-  gender: 'male'
+  console.error('✗ Invalid legacy patient')
 }
 
-patientService.add(p3)
-patientService.update('P003', { age: 31 })
-
+console.log('Danh sach benh nhan:')
 console.log(patientService.getAll())
+
+// ================= DAY 5–6: PRESCRIPTION + VALIDATION =================
+const prescriptionService = new PrescriptionService()
+try {
+  const validPrescription = prescriptionService.addPrescription({
+    id: 'RX001',
+    medicalRecordId: 'MR001',
+    medicine: 'Aspirin',
+    dosage: '500mg'
+  })
+
+  console.log('✓ Prescription added:', validPrescription)
+} catch (error) {
+  console.error('✗ Error:', (error as Error).message)
+}
+
+// ❌ TEST INVALID PRESCRIPTION (PHẢI THROW ERROR)
+try {
+  prescriptionService.addPrescription({
+    id: 'RX002',
+    medicalRecordId: 'MR002',
+    medicine: '', // ❌ invalid
+    dosage: '250mg'
+  })
+} catch (error) {
+  console.error(
+    '✓ Caught expected error:',
+    (error as Error).message
+  )
+}
+
+// ================= END =================
+console.log('DONE')
